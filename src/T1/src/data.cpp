@@ -6,21 +6,30 @@
 #include "mods/login.hpp"
 
 string encrypt(const string& a,const string& key){
-    using mchar=_mint<char,int,127>;
-    mchar num=hash<string>()(key);
+    using mchar=_mint<uint16_t,uint32_t,65521>;
+    auto num=hash<string>()(key);
     string w;
-    for (auto i:a)
-        w+=(mchar(i)*num).v;
+    for (auto i:a){
+        mchar c=(uint16_t)(unsigned char)i;
+        c*=(mchar)num;
+        w+=c.v&(0x00ff);
+        w+=(c.v&(0xff00))>>8;
+        num=hash<string>()(to_string(num)+"salt"+key);
+    }
     return w;
 }
 
 string decrypt(const string& a,const string& key){
-    using mchar=_mint<int,int,127>;
-    mchar num=hash<string>()(key);
-    num=num.inverse();
+    using mchar=_mint<uint16_t,uint32_t,65521>;
+    auto num=hash<string>()(key);
     string w;
-    for (auto i:a)
-        w+=(mchar(i)*num).v;
+    for (size_t i=0;i<a.size();i+=2){
+        mchar c=(uint16_t)(unsigned char)a[i]|
+        ((uint16_t)(unsigned char)a[i+1]<<8);
+        c/=(mchar)num;
+        w+=(char)c.v;
+        num=hash<string>()(to_string(num)+"salt"+key);
+    }
     return w;
 }
 
@@ -126,7 +135,7 @@ void syncdb(){
     for (auto &[k,v]:data_base){
         out+=encode(k)+"="+encode(v)+"\n";
     }
-    os<<data_base["username"]<<endl<<data_base["password"]<<endl<<
+    os<<data_base["password"]<<endl<<
     encrypt(out,decrypt_key);
 }
 
@@ -136,11 +145,6 @@ void inidb1(){
     string a;
     getline(is,a);
     if (a.size()){
-        data_base["username"]=a;
-    }else return ;
-    a.clear();
-    getline(is,a);
-    if (a.size()){
         data_base["password"]=a;
     }else return ;
 }
@@ -148,7 +152,6 @@ void inidb2(){
     string input;
     {
         ifstream is(config_filename);
-        while (is&&is.get()!='\n');
         while (is&&is.get()!='\n');
         while (is) input+=is.get();
     }

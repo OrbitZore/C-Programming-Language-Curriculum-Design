@@ -9,7 +9,6 @@ string encode(const string& a);
 string decode(const string& a);
 
 inline const map<string,string> default_kv={
-    {"username","root"},
     {"password",shash("passwd")},
 };
 

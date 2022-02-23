@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-target("pwdkeeper")
+target("seal")
 	set_languages("c++20")
 	set_optimize("fastest")
 	add_includedirs("../headers")

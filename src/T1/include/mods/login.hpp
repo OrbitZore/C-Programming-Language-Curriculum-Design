@@ -8,11 +8,9 @@ inline void update_decrypt_key(const string& rawpwd){
 }
 inline void login(){
     while ([](){
-        string username,password;
-        ui::getline(username,"请输入用户名:"s);
+        string password;
         ui::getline(password,"请输入密码:"s);
-        if (data_base["username"]==username&&
-            data_base["password"]==shash(password)){
+        if (data_base["password"]==shash(password)){
                 println("登陆成功");
                 update_decrypt_key(password);
                 return false;

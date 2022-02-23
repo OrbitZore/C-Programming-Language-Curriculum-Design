@@ -7,9 +7,8 @@ inline void modify(){
     auto& u=user_list[wi];
     println("选中) {} {} {} {} {} {}",wi,u.pos,u.description,u.name,u.pwd);
     size_t ci=ui::choose({
-        "帐号位置","帐号描述","帐号名","密码",
-        "请选中将要修改的值"
-    });
+        "帐号位置","帐号描述","帐号名","密码"
+    },"请选中将要修改的值");
     if (ci==0){
         u.pos=ui::getline("请输入新的帐号位置");
     }else if (ci==1){

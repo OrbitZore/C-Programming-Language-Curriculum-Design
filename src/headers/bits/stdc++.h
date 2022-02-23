@@ -114,3 +114,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #endif
+#if __cplusplus >= 201703L
+#include <optional>
+#endif
