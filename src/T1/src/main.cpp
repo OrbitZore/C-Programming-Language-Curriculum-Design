@@ -1,26 +1,35 @@
 #include "cardinal.hpp"
 #include "ui.h"
 #include "data.h"
-#include "login.h"
+#include "mods/allmods.hpp"
 
 const vec<string> main_menu={
-    "Add a user",
-    "Get average score",
-    "Sort",
-    "Search",
-    "Print"
+    "输入信息",
+    "查询信息",
+    "查看全部信息",
+    "修改信息",
+    "删除信息",
+    "更改密码",
+    "退 出"
 };
-
+void(*menu_func[])(void)={
+    input,
+    search,
+    printall,
+    modify,
+    erase,
+    changepwd,
+    [](){exit(0);}
+};
 int main(int argc, char** argv){
+    inidb1();
+    login();
+    inidb2();
     while (true){
-        login();
-        int w=ui::choose(main_menu);
-        if (w==0){
-        }else if (w==1){
-        }else if (w==2){
-        }else if (w==3){
-        }else if (w==4){
-        }
+        int w=ui::choose(main_menu,"主菜单");
+        menu_func[w]();
+        syncdb();
+        ui::getline("按回车键返回主菜单",true);
     }
     return 0;
 }
