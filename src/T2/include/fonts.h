@@ -1,4 +1,4 @@
 #pragma once
 #include "cardinal.hpp"
-#include "bmp.hpp"
+#include "image.hpp"
 optional<bitmap> find_bitmap(string hexcode);

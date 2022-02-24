@@ -6,6 +6,7 @@ target("seal")
 	add_includedirs("../headers")
 	add_includedirs("include")
     set_kind("binary")
+    add_links("iconv")
     add_files("src/*.cpp")
 
 --
