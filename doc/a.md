@@ -1,30 +1,43 @@
 # 阅读须知
 
-本次课设报告中的代码前均引入了`ATL/base/include/cardinal.hpp`头文件，为避免重复在这里一次性给出。
+本次课设报告任务一的代码前均引入了 `ATL/base/include/cardinal.hpp`头文件，为避免重复在这里一次性给出。
 
-同样，`solution`类行为均为处理一组输入数据。将在main函数多次调用`solution`类实现多组数据。这里一并给出。
+任务二和任务三将使用 `xmake`构建工具，使用 `C++20`标准编译。
 
-本人使用C++11高级模板技巧原创`ATL`通用算法模板库github开源地址：https://github.com/OrbitZore/ATL
+本人使用 `C++11 `高级模板技巧原创 `ATL`通用算法模板库github开源地址：https://github.com/OrbitZore/ATL
 
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
+struct FAST_IO{
+	FAST_IO(){
+		ios_base::sync_with_stdio(false);
+		cin.tie(NULL);
+	}
+}__fast_io;
+#if __cplusplus < 201402L
+template<class T, class U=T>
+T exchange(T& obj, U&& new_value){
+    T old_value=move(obj);
+    obj=forward<U>(new_value);
+    return old_value;
+}
+#endif
+#define cons(a,...) a=typename decay<decltype(a)>::type(__VA_ARGS__)
 using INT=int;
+#define x first
+#define y second
 //#define int long long
 #define pb push_back
 #define eb emplace_back
 #define all(a) (a).begin(),(a).end()
-template<class T>
-using refT=reference_wrapper<T>;
-template<class T>
-using crefT=reference_wrapper<const T>;
 auto &_=std::ignore;
 using ll=long long;
 template<class T>
 using vec=vector<T>;
 template<bool B,class T=void>
 using enableif_t=typename enable_if<B,T>::type;
-//以下为工具宏
+
 #define DEF_COULD(name,exp) \
 template<class U> \
 struct name{\
@@ -39,17 +52,18 @@ struct name{\
 #define ENABLEN(T,name) enableif_t<!can##name<T>::value>(1)
 #define FOR_TUPLE enableif_t<i!=tuple_size<T>::value>(1)
 #define END_TUPLE enableif_t<i==tuple_size<T>::value>(1)
+#define FOR_TUPLET(T) enableif_t<i!=tuple_size<T>::value>(1)
+#define END_TUPLET(T) enableif_t<i==tuple_size<T>::value>(1)
 
 #define DEF_INF(name,exp)\
 constexpr struct{\
 	template<class T>\
 	constexpr operator T()const {return numeric_limits<T>::exp();}\
 } name;
-//定义SFINAE工具
+
 DEF_CAN(Out,(cout<<*(T*)(0))) DEF_CAN(For,begin(*(T*)(0)))
-//定义极限工具变量
 DEF_INF(INF,max) DEF_INF(MINF,min)
-//以下为读入tuple
+
 template<size_t i,class T>
 auto operator>>(istream& is,T &r)->decltype(END_TUPLE,is){
 	return is;
@@ -59,7 +73,27 @@ auto operator>>(istream& is,T &r)->decltype(FOR_TUPLE,is){
 	is>>get<i>(r);
 	return operator>> <i+1>(is,r);
 }
-//以下为仿C++20 std::format实现
+
+template<size_t i,class ...Args>
+auto operator>>(istream& is,const tuple<Args&...> &r)->decltype(END_TUPLET(tuple<Args&...>),is){
+	return is;
+}
+template<size_t i=0,class ...Args>
+auto operator>>(istream& is,const tuple<Args&...> &r)->decltype(FOR_TUPLET(tuple<Args&...>),is){
+	is>>get<i>(r);
+	return operator>> <i+1>(is,r);
+}
+
+template<class T>
+auto __format(ostream &os,const char *c,const T& cv)->decltype(ENABLE(T,Out),c+1);
+template<size_t i,class T>
+auto __format(ostream &os,const char *c,const T& cv)->decltype(ENABLEN(T,For),END_TUPLE,c+1);
+template<size_t i=0,class T>
+auto __format(ostream &os,const char *c,const T& cv)->decltype(ENABLEN(T,For),FOR_TUPLE,c+1);
+template<class T>
+auto __format(ostream &os,const char *c,const T& cv)->decltype(ENABLEN(T,Out),ENABLE(T,For),c+1);
+
+
 template<class T>
 auto __format(ostream &os,const char *c,const T& cv)->decltype(ENABLE(T,Out),c+1){
 	os << cv;
@@ -70,7 +104,7 @@ template<size_t i,class T>
 auto __format(ostream &os,const char *c,const T& cv)->decltype(ENABLEN(T,For),END_TUPLE,c+1){
 	return c;
 }
-template<size_t i=0,class T>
+template<size_t i,class T>
 auto __format(ostream &os,const char *c,const T& cv)->decltype(ENABLEN(T,For),FOR_TUPLE,c+1){
 	while (*c!='{') os << *c++;
 	c=__format(os,c,get<i>(cv));
@@ -98,26 +132,27 @@ void _format(ostream &os,const char *c){
 	while (*c!='{'&&*c!='\0') os<< *c++;
 }
 template<class T,class ...Args>
-void _format(ostream &os,const char *c,const T &a,Args&& ...rest){
+void _format(ostream &os,const char *c,const T &a,const Args& ...rest){
 	while (*c!='{'&&*c!='\0') os<< *c++;
 	if (*c=='{') c=__format(os,c,a);
-	_format(os,c,forward<Args>(rest)...);
+	_format(os,c,rest...);
 }
 template<class ...Args>
-string format(const char *c,Args&& ...rest){
+string format(const char *c,const Args& ...rest){
 	ostringstream os;
-	_format(os,c,forward<Args>(rest)...);
+	_format(os,c,rest...);
 	return os.str();
 }
 template<class ...Args>
-ostream& print(const char *c,Args&& ...rest){return _format(cout,c,forward<Args>(rest)...),cout;}
+ostream& print(const char *c,const Args& ...rest){return _format(cout,c,rest...),cout;}
+template<class ...Args>
+ostream& println(const char *c,const Args& ...rest){return print(c,rest...)<<endl;}
 
-#ifdef LOCAL
+#ifndef LOCAL
 #define debug(...) cerr<<format(__VA_ARGS__)
 #else
 #define debug(...) cerr
 #endif
-//以下为读入多维数组实现
 template<class T,class ...Args>
 struct Rtar{
 	T& a;tuple<Args...> n;
@@ -138,7 +173,6 @@ auto operator>>(istream& is,Rtar<U,Args&...> r)->decltype(FOR_TUPLE,is){
 		operator>> <i+1>(is,Rtar<decltype(w),Args&...>(w,r.n));
 	return is;
 }
-//以下为取最小最大值并赋值函数实现
 template<class T1,class T2>
 bool cmin(T1 &a,const T2 b){return a>b?a=b,1:0;}
 template<class T1,class T2>
@@ -147,33 +181,5 @@ template<class T1,class T2,class ...T3>
 bool cmin(T1 &a,const T2 b,const T3 ...rest){return cmin(a,b)|cmin(a,rest...);}
 template<class T1,class T2,class ...T3>
 bool cmax(T1 &a,const T2 b,const T3 ...rest){return cmax(a,b)|cmax(a,rest...);}
-//控制输入多组数据
-bool MULTIDATA=false;
-struct solution{
-	//...略
-	void scan(){
-		//...略
-	}
-	
-	void solve(){
-		//...略
-	} 
-};
-
-
-INT main(){
-    //取消同步，加速cin,cout
-	cin.tie(0);
-	ios::sync_with_stdio(false);
-	int T=1;
-	if (MULTIDATA) cin>>(T);
-    //多组数据处理
-	while (T--){
-		auto a=unique_ptr<solution>(new solution());
-		a->scan();
-		a->solve();
-		if (!cin.good()) break;
-	}
-	return 0;
-}
+bool MULTIDATA=true;
 ```

@@ -1,4 +1,4 @@
-add_rules("mode.debug", "mode.release")
+add_rules	("mode.debug", "mode.release")
 
 target("seal")
 	set_languages("c++20")

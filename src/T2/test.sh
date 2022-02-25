@@ -1,3 +1,2 @@
 #!/bin/sh
-xmake
-xmake run seal 毛玉毛玉
+xmake && xmake run -w . seal $1
